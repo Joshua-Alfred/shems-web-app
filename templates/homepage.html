@@ -1,0 +1,27 @@
+<!-- templates/homepage.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Energy Management System - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        window.onload = function() {
+            // Retrieve user's first name from session storage
+            var userName = sessionStorage.getItem('userName');
+            if (userName) {
+                document.getElementById('welcome-message').textContent = 'Hi! ' + userName;
+                window.location.href = 'homepage.html';
+            } else {
+                // Redirect to login page if userName not found in session storage
+                window.location.href = 'login.html';
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Smart Home Energy Management System</h1>
+    <div id="welcome-message">Hi!</div>
+</body>
+</html>

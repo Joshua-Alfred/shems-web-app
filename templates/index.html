@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Data</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Zip</th>
+        </tr>
+        {% for customer in data %}
+        <tr>
+            <td>{{ customer.cust_id }}</td>
+            <td>{{ customer.cust_fname }}</td>
+            <td>{{ customer.cust_lname }}</td>
+            <td>{{ customer.cust_email }}</td>
+            <td>{{ customer.cust_phone }}</td>
+            <td>{{ customer.bill_addr }}</td>
+            <td>{{ customer.bill_addr_city }}</td>
+            <td>{{ customer.bill_addr_state }}</td>
+            <td>{{ customer.bill_addr_zip }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
