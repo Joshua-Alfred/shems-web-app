@@ -11,6 +11,36 @@
     <h1>Smart Home Energy Management System</h1>
     <div id="welcome-message">Hi!</div>
 
+    <!-- Add this section below your greeting message in homepage.html -->
+<section id="service-locations">
+    <h2>Your Service Locations</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>SL ID</th>
+                <th>Unit No.</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Zip</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for location in service_locations %}
+            <tr>
+                <td>{{ location.sl_id }}</td>
+                <td>{{ location.sl_unit_no }}</td>
+                <td>{{ location.sl_addr }}</td>
+                <td>{{ location.sl_city }}</td>
+                <td>{{ location.sl_state }}</td>
+                <td>{{ location.sl_zip }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+
     <script>
         window.onload = function() {
             var userName = sessionStorage.getItem('userName');
