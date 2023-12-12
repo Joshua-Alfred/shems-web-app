@@ -1,23 +1,28 @@
 // static/login.js
-function checkCredentials() {
-    var email = document.getElementById('email').value;
-    var password = document.getElementById('password').value;
-    
-    // Hardcoded credentials for simplicity
-    var users = [
-        { email: 'alicej@email.com', password: 'alicej', name: 'Alice' },
-        { email: 'janesmith@email.com', password: 'janes', name: 'Jane' },
-        { email: 'johndoe@email.com', password: 'johnd', name: 'John' }
-    ];
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+        e.preventDefault();  // Prevent the default form submission
 
-    var authenticatedUser = users.find(user => user.email === email && user.password === password);
+        var email = document.getElementsByName('email')[0].value;
+        var password = document.getElementsByName('password')[0].value;
 
-    if (authenticatedUser) {
-        // Store authenticated user's first name in session storage
-        sessionStorage.setItem('userName', authenticatedUser.name);
-        window.location.href = '/homepage'; // Redirect to homepage route in Flask
+        // Define your users and credentials
+        var users = {
+            'alicej@email.com': {'password': 'alicej', 'name': 'Alice'},
+            'janesmith@email.com': {'password': 'janes', 'name': 'Jane'},
+            'johndoe@email.com': {'password': 'johnd', 'name': 'John'}
+        };
 
-    } else {
-        alert('Incorrect email or password. Please try again.');
-    }
-}
+        // Check if the credentials are correct
+        var user = users[email];
+        if (user && user.password === password) {
+            // Store the user's first name in sessionStorage
+            sessionStorage.setItem('userName', user.name);
+            // Redirect to the homepage
+            window.location.href = '/homepage';
+        } else {
+            // Show an error message or handle invalid credentials
+            alert('Invalid credentials. Please try again.');
+        }
+    });
+});
