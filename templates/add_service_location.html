@@ -1,0 +1,30 @@
+<!-- templates/add_service_location.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add a Service Location</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Add a Service Location</h1>
+    <form action="/submit-service-location" method="post" id="add-service-form">
+        <input type="text" name="unit_number" placeholder="Unit Number" required>
+        <input type="text" name="address" placeholder="Address" required>
+        <input type="text" name="city" placeholder="City" required>
+        <input type="text" name="state" placeholder="State" required>
+        <input type="text" name="zipcode" placeholder="Zipcode" required>
+        Bought at:<br>
+        <input type="date" name="bought_at" placeholder="Bought at" required>
+        <input type="number" name="square_footage" placeholder="Square footage" required min="0">
+        <input type="number" name="number_of_bedrooms" placeholder="No. of bedrooms" required min="0">
+        <input type="number" name="number_of_occupants" placeholder="No. of occupants" required min="0">
+        <section id="add-devices">
+            <h2>Add Devices</h2>
+            <!-- Device fields will be added here later -->
+        </section>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
