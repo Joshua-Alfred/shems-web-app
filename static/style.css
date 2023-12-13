@@ -172,3 +172,50 @@ section#add-devices {
     }
 }
 
+/* Add this to your existing style.css */
+.device-form {
+    background: #e7f5e6;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.device-form label {
+    margin-right: 10px;
+}
+
+.device-form select {
+    margin-right: 10px;
+}
+
+#add-device-btn {
+    background-color: #007bff; /* Blue color */
+    color: white;
+    margin: 10px 0;
+    display: inline-block; /* To allow margin to take effect */
+}
+
+#add-device-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+#device-section {
+    margin-bottom: 20px; /* Add space between device section and submit button */
+}
+
+.logout-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #dc3545; /* Bootstrap 'danger' color for logout buttons */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none; /* Remove underline from links */
+}
+
+.logout-btn:hover {
+    background-color: #c82333; /* A slightly darker red for the hover state */
+}

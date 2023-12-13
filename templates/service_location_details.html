@@ -1,0 +1,101 @@
+<!-- templates/service_location_details.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Location Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- Link to your existing CSS file -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        div {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        p {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Service Location Details</h1>
+    <div>
+        <p><strong>SL ID:</strong> {{ location.sl_id }}</p>
+        <p><strong>Unit No:</strong> {{ location.sl_unit_no }}</p>
+        <p><strong>Address:</strong> {{ location.sl_addr }}</p>
+        <p><strong>City:</strong> {{ location.sl_city }}</p>
+        <p><strong>State:</strong> {{ location.sl_state }}</p>
+        <p><strong>Zip:</strong> {{ location.sl_zip }}</p>
+        <p><strong>Bought at:</strong> {{ location.sl_boughtat }}</p>
+        <p><strong>Square Footage:</strong> {{ location.sl_squarefootage }}</p>
+        <p><strong>No. of Bedrooms:</strong> {{ location.sl_bedrooms }}</p>
+        <p><strong>No. of Occupants:</strong> {{ location.sl_occupants }}</p>
+        
+    </div>
+    <section id="active-devices">
+        <h2>Active Devices and Consumption</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Device ID</th>
+                    <th>Model Name</th>
+                    <th>Type</th>
+                    <th>Total Consumption (in Dollars)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for device in devices %}
+                <tr>
+                    <td>{{ device.dev_id }}</td>
+                    <td>{{ device.m_name }}</td>
+                    <td>{{ device.m_type }}</td>
+                    <td>{{ device.tot_consume }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    <br>
+    <section id="active-devices">
+        <h2>Activity Log</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Activity ID</th>
+                    <th>Device ID</th>
+                    <th>Model</th>
+                    <th>Time</th>
+                    <th>Activity</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for act in activities %}
+                <tr>
+                    <td>{{ act.act_id }}</td>
+                    <td>{{ act.dev_id }}</td>
+                    <td>{{ act.m_name }}</td>
+                    <td>{{ act.act_time }}</td>
+                    <td>{{ act.act_label }}</td>
+                    <td>{{ ' ' if act.act_val is none else act.act_val }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</body>
+</html>

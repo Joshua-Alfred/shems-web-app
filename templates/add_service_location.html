@@ -22,9 +22,40 @@
         <input type="number" name="number_of_occupants" placeholder="No. of occupants" required min="0">
         <section id="add-devices">
             <h2>Add Devices</h2>
-            <!-- Device fields will be added here later -->
+            <div id="device-section">
+            <div class="device-form">
+                <label for="device-type">Type:</label>
+                <select name="device_type" class="device-type" required>
+                    <option value="">Select Type</option>
+                    <option value="Refrigerator">Refrigerator</option>
+                    <option value="Light Bulb">Light Bulb</option>
+                    <option value="Washer">Washer</option>
+                    <option value="Dryer">Dryer</option>
+                    <option value="Television">Television</option>
+                    <option value="Heater">Heater</option>
+                </select>
+
+                <label for="model-name">Model Name:</label>
+                <select name="model_name" class="model-name" required>
+                    <option value="">Select Model</option>
+                    <!-- Model options will be populated based on Type selection -->
+                </select>
+            </div>
+            </div>
+            <button type="button" id="add-device-btn">Add new device</button>
         </section>
         <button type="submit">Submit</button>
     </form>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('add-device-btn').addEventListener('click', function() {
+        var deviceSection = document.getElementById('device-section');
+        var original = document.querySelector('.device-form');
+        var clone = original.cloneNode(true);
+        deviceSection.appendChild(clone);
+        });
+    });
+    </script>
+    <script src="{{ url_for('static', filename='add-device.js') }}" defer></script>
 </body>
 </html>

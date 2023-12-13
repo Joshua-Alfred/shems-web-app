@@ -9,7 +9,8 @@
 </head>
 <body>
     <h1>Smart Home Energy Management System</h1>
-    <div id="welcome-message">Hi!</div>
+    <div id="welcome-message">Hi {{ user_name }}!</div>
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
 
     <!-- Add this section below your greeting message in homepage.html -->
 <section id="service-locations">
@@ -29,7 +30,7 @@
         <tbody>
             {% for location in service_locations %}
             <tr>
-                <td>{{ location.sl_id }}</td>
+                <td><a href="{{ url_for('service_location_details', sl_id=location.sl_id) }}">{{ location.sl_id }}</a></td>
                 <td>{{ location.sl_unit_no }}</td>
                 <td>{{ location.sl_addr }}</td>
                 <td>{{ location.sl_city }}</td>
@@ -44,12 +45,12 @@
 
     <script>
         window.onload = function() {
-            var userName = sessionStorage.getItem('userName');
+            var userName = sessionStorage.getItem('user_name');
             if (userName) {
                 document.getElementById('welcome-message').textContent = 'Hi! ' + userName;
             } else {
                 // Redirect to login page if userName not found in session storage
-                window.location.href = '/login';
+                // window.location.href = '/login';
             }
         };
     </script>

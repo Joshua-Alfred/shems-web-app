@@ -16,10 +16,25 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if the credentials are correct
         var user = users[email];
         if (user && user.password === password) {
-            // Store the user's first name in sessionStorage
-            sessionStorage.setItem('userName', user.name);
-            // Redirect to the homepage
-            window.location.href = '/homepage';
+            // When authentication is successful, send the user's name to the server to start the session
+            fetch('/start_session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `user_name=${encodeURIComponent(user.name)}`
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/homepage';
+                } else {
+                    throw new Error('Failed to start session.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start session.');
+            });
         } else {
             // Show an error message or handle invalid credentials
             alert('Invalid credentials. Please try again.');
