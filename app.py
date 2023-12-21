@@ -314,8 +314,7 @@ def submit_service_location():
         finally:
             cursor.close()
             conn.close()
-        
-        # Redirect to the homepage after insertion
+
         return redirect('/homepage')
     else:
         return redirect('/login')
@@ -334,9 +333,60 @@ def service_location_details(sl_id):
 
 @app.route('/logout')
 def logout():
-    # Remove user_name from session
     session.pop('user_name', None)
     return redirect('/login')
+
+@app.route('/delete-device/<int:device_id>', methods=['POST'])
+def delete_device(device_id):
+    if 'logged_in' in session and session['logged_in']:
+        try:
+            conn = pyodbc.connect(
+                'DRIVER={ODBC Driver 17 for SQL Server};'
+                'SERVER=DESKTOP-KTBJ3S3\SQLEXPRESS;'
+                'DATABASE=SHEMS;'
+                'Trusted_Connection=yes;'
+            )
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM ActivityLog WHERE dev_id = ?", device_id)
+            cursor.execute("DELETE FROM EnergyLog WHERE dev_id = ?", device_id)
+            cursor.execute("DELETE FROM Device WHERE dev_id = ?", device_id)
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            print(f"An error occurred: {e}")
+            return "An error occurred", 500  
+        finally:
+            cursor.close()
+            conn.close()
+            return redirect('/homepage')  # Redirect to a confirmation page or back to the details page
+    else:
+        return redirect('/login')
+
+@app.route('/delete-service-location/<int:sl_id>', methods=['POST'])
+def delete_service_location(sl_id):
+    if 'logged_in' in session and session['logged_in']:
+        try:
+            conn = pyodbc.connect(
+                'DRIVER={ODBC Driver 17 for SQL Server};'
+                'SERVER=DESKTOP-KTBJ3S3\SQLEXPRESS;'
+                'DATABASE=SHEMS;'
+                'Trusted_Connection=yes;'
+            )
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM Device WHERE sl_id = ?", sl_id)
+            cursor.execute("DELETE FROM ServiceLocation WHERE sl_id = ?", sl_id)
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            print(f"An error occurred: {e}")
+            return "An error occurred", 500  
+        finally:
+            cursor.close()
+            conn.close()
+            return redirect('/homepage')  
+    else:
+        return redirect('/login')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
