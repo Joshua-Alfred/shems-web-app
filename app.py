@@ -3,6 +3,39 @@ from datetime import timedelta, datetime
 
 import pyodbc
 
+def fetch_energy_data_by_zip(customer_id):
+    # Database connection credentials
+    conn = pyodbc.connect(
+        'DRIVER={ODBC Driver 17 for SQL Server};'
+        'SERVER=DESKTOP-KTBJ3S3\SQLEXPRESS;'
+        'DATABASE=SHEMS;'
+        'Trusted_Connection=yes;'
+    )
+    cursor = conn.cursor()
+    
+    query = """
+    SELECT sl.sl_zip, SUM(el.el_val) AS TotalEnergyUsed
+    FROM ServiceLocation sl
+    JOIN Device d ON sl.sl_id = d.sl_id
+    JOIN EnergyLog el ON d.dev_id = el.dev_id
+    WHERE sl.cust_id = ?
+    GROUP BY sl.sl_zip
+    """
+    
+    
+    cursor.execute(query, customer_id)
+    
+    
+    energy_data = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    
+    energy_data_list = [{'ZIPCode': row.sl_zip, 'TotalEnergyUsed': row.TotalEnergyUsed} for row in energy_data]
+    
+    return energy_data_list
+
+
 def get_pid_by_name(user_name):
     # Assuming 'user_name' maps to a 'name' column in the 'Customer' table
     # and 'pid' is a column in the same table
@@ -34,8 +67,59 @@ def get_service_locations_by_pid(pid):
     conn.close()
     return locations
 
-def get_service_location_by_id(id):
-    # Assuming 'ServiceLocation' table has 'pid' as a foreign key to 'Customer'
+def fetch_weekly_energy_data(user_id):
+    # Connect to your database
+    conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
+                          'SERVER=DESKTOP-KTBJ3S3\SQLEXPRESS;'
+                          'DATABASE=SHEMS;'
+                          'Trusted_Connection=yes;')
+    cursor = conn.cursor()
+
+    # Fetch the weekly energy consumption for the user's service locations
+    query = """
+    SELECT 
+        sl.sl_id AS ServiceLocationID, 
+        DATEPART(week, el.el_time) AS WeekOfYear,
+        DATEPART(year, el.el_time) AS Year,
+        SUM(el.el_val) AS TotalEnergyUsed
+    FROM 
+        EnergyLog el
+    JOIN 
+        Device d ON el.dev_id = d.dev_id
+    JOIN 
+        ServiceLocation sl ON d.sl_id = sl.sl_id
+    WHERE 
+        sl.cust_id = ? AND 
+        el.el_time BETWEEN '2022-07-01' AND '2022-12-31'
+    GROUP BY 
+        sl.sl_id, 
+        DATEPART(week, el.el_time),
+        DATEPART(year, el.el_time)
+    ORDER BY 
+        Year, WeekOfYear
+    """
+    
+    cursor.execute(query, user_id)
+    results = cursor.fetchall()
+    
+    # Close the cursor and the connection
+    cursor.close()
+    conn.close()
+
+    # Organize the results by service location
+    weekly_data = {}
+    for row in results:
+        location_id = row.ServiceLocationID
+        if location_id not in weekly_data:
+            weekly_data[location_id] = []
+        weekly_data[location_id].append({
+            'week': f"{row.Year}-W{row.WeekOfYear}",
+            'energy': row.TotalEnergyUsed
+        })
+    print(weekly_data)
+    return weekly_data
+
+def fetch_energy_usage_per_service_location(customer_id):
     conn = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
         'SERVER=DESKTOP-KTBJ3S3\SQLEXPRESS;'
@@ -43,14 +127,84 @@ def get_service_location_by_id(id):
         'Trusted_Connection=yes;'
     )
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM ServiceLocation WHERE sl_id = ?", id)
-    locations = cursor.fetchone()
-    cursor.execute("SELECT d.dev_id, dm.m_type, dm.m_name, SUM(e.el_price) AS tot_consume FROM Device d JOIN DeviceModel dm ON dm.mid = d.mid JOIN EnergyLog e ON d.dev_id = e.dev_id WHERE sl_id = ? GROUP BY d.dev_id, dm.m_type, dm.m_name", id)
-    devices = cursor.fetchall()
-    cursor.execute("SELECT a.act_id, d.dev_id, dm.m_name, a.act_time, a.act_label, a.act_val FROM ActivityLog a JOIN Device d ON d.dev_id = a.dev_id JOIN DeviceModel dm ON d.mid = dm.mid WHERE d.dev_id IN (SELECT dev_id from Device WHERE sl_id = ?) ORDER BY act_time", id)
-    activities = cursor.fetchall()
+    
+    query = """
+    SELECT ServiceLocationID, SUM(TotalEnergyUsed) AS TotalEnergy
+    FROM VwEnergyUsagePerUser
+    WHERE CustomerID = ?
+    GROUP BY ServiceLocationID
+    ORDER BY ServiceLocationID
+    """
+    
+
+    cursor.execute(query, customer_id)
+    
+
+    energy_data = cursor.fetchall()
     cursor.close()
     conn.close()
+    
+    
+    energy_data_sl_list = [{'ServiceLocationID': row.ServiceLocationID, 'TotalEnergy': row.TotalEnergy} for row in energy_data]
+    
+    return energy_data_sl_list
+
+def fetch_energy_data_by_device_type(customer_id):
+    conn = pyodbc.connect(
+        'DRIVER={ODBC Driver 17 for SQL Server};'
+        'SERVER=DESKTOP-KTBJ3S3\SQLEXPRESS;'
+        'DATABASE=SHEMS;'
+        'Trusted_Connection=yes;'
+    )
+    cursor = conn.cursor()
+
+    query = """
+    SELECT DeviceType, SUM(TotalEnergyUsed) as TotalEnergy
+    FROM VwCustomerEnergyUsageByDeviceType
+    WHERE CustomerID = ?
+    GROUP BY DeviceType
+    """
+    
+    cursor.execute(query, customer_id)
+    
+    # Fetch all rows from the cursor
+    energy_data = cursor.fetchall()
+    
+    # Close the cursor and the connection
+    cursor.close()
+    conn.close()
+    
+    # Transform the raw data into a list of dictionaries
+    energy_data_list = [
+        {'DeviceType': row.DeviceType, 'TotalEnergyUsed': row.TotalEnergy}
+        for row in energy_data
+    ]
+
+    return energy_data_list
+
+def get_service_location_by_id(id):
+    # Assuming 'ServiceLocation' table has 'pid' as a foreign key to 'Customer'
+    try:
+        conn = pyodbc.connect(
+            'DRIVER={ODBC Driver 17 for SQL Server};'
+            'SERVER=DESKTOP-KTBJ3S3\SQLEXPRESS;'
+            'DATABASE=SHEMS;'
+            'Trusted_Connection=yes;'
+        )
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM ServiceLocation WHERE sl_id = ?", id)
+        locations = cursor.fetchone()
+        cursor.execute("SELECT d.dev_id, dm.m_type, dm.m_name, SUM(e.el_price) AS tot_consume FROM Device d JOIN DeviceModel dm ON dm.mid = d.mid JOIN EnergyLog e ON d.dev_id = e.dev_id WHERE sl_id = ? GROUP BY d.dev_id, dm.m_type, dm.m_name", id)
+        devices = cursor.fetchall()
+        cursor.execute("SELECT a.act_id, d.dev_id, dm.m_name, a.act_time, a.act_label, a.act_val FROM ActivityLog a JOIN Device d ON d.dev_id = a.dev_id JOIN DeviceModel dm ON d.mid = dm.mid WHERE d.dev_id IN (SELECT dev_id from Device WHERE sl_id = ?) ORDER BY act_time", id)
+        activities = cursor.fetchall()
+    except Exception as e:
+        conn.rollback()
+        print(f"An error occurred: {e}")
+        return "An error occurred", 500  
+    finally:
+        cursor.close()
+        conn.close()
     return locations, devices, activities
 
 
@@ -85,7 +239,16 @@ def homepage():
         # Retrieve user details using session['user_name']
         pid = get_pid_by_name(session['user_name'])
         service_locations = get_service_locations_by_pid(pid)
-        return render_template('homepage.html', user_name=session['user_name'], service_locations=service_locations)
+        device_energy_data = fetch_energy_data_by_device_type(pid)
+        energy_zip_data = fetch_energy_data_by_zip(pid)
+        energy_service_location_data = fetch_energy_usage_per_service_location(pid)
+        weekly_data_json = fetch_weekly_energy_data(pid)
+        return render_template('homepage.html', user_name=session['user_name'], 
+                               service_locations=service_locations, 
+                               device_energy_data=device_energy_data, 
+                               energy_zip_data=energy_zip_data, 
+                               energy_service_location_data=energy_service_location_data,
+                               weekly_data_json=weekly_data_json)
     else:
         # If not logged in, redirect to the login page
         return redirect('/login')

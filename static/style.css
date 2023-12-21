@@ -219,3 +219,51 @@ section#add-devices {
 .logout-btn:hover {
     background-color: #c82333; /* A slightly darker red for the hover state */
 }
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px;
+    margin: 20px 0;
+}
+
+.grid-item {
+    position: relative;
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px; /* rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* subtle shadow for depth */
+    padding: 20px;
+    text-align: center;
+    overflow: hidden; /* ensure nothing spills out of the grid box */
+}
+
+.grid-item img {
+    width: 100%;
+    height: auto;
+    max-height: 250px;
+}
+
+.grid-title {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 1rem;
+    font-weight: bold;
+    z-index: 10; /* ensure the title is above the image */
+}
+
+#energyByZipChart, #energyByServiceLocationChart {
+    max-height: 200px; /* Fixed height */
+    overflow: hidden; /* Ensure the content does not overflow */
+}
+
+#weeklyEnergyChart {
+    max-height: 300px; /* Fixed height */
+    overflow: hidden; /* Ensure the content does not overflow */
+}

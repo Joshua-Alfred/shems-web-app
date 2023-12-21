@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Home Energy Management System - Home</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -42,6 +43,33 @@
     </table>
 </section>
 
+<section id="energy-usage-graphs">
+    <center><h2>Your Activity</h2></center>
+    <div class="grid-container">
+        <!-- Each grid item includes a title and a placeholder image for the graph -->
+        <div class="grid-item">
+            <h3 class="grid-title">Energy consumed by Service Location</h3>
+            <br>
+            <canvas id="energyByServiceLocationChart" width="400" height="400"></canvas>
+            </div>
+        <div class="grid-item">
+            <h3 class="grid-title">Energy Consumed by ZIP</h3>
+            <br>
+            <canvas id="energyByZipChart" width="400" height="400"></canvas>
+        </div>
+        <div class="grid-item">
+            <h3 class="grid-title">Activity by Device type</h3>
+            <br>
+            <canvas id="deviceTypeChart" width="100" height="100"></canvas>
+        </div>
+        <div class="grid-item">
+            <h3 class="grid-title">Weekly Energy Consumption</h3>
+            <br>
+            <canvas id="weeklyEnergyChart" width="400" height="400"></canvas>
+        </div>
+    </div>
+</section>
+
 
     <script>
         window.onload = function() {
@@ -53,6 +81,246 @@
                 // window.location.href = '/login';
             }
         };
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        var ctx = document.getElementById('deviceTypeChart').getContext('2d');
+        var deviceEnergyData = {{ device_energy_data | tojson }};
+        
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: deviceEnergyData.map(data => data.DeviceType),
+                datasets: [{
+                    label: 'Energy Usage',
+                    data: deviceEnergyData.map(data => data.TotalEnergyUsed),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(215, 106, 76, 0.2)',
+                        'rgba(153, 226, 98, 0.2)',
+                        'rgba(211, 232, 45, 0.2)',
+                        
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(215, 106, 76, 1)',
+                        'rgba(153, 226, 98, 1)',
+                        'rgba(211, 232, 45, 1)',
+                        
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 10,
+                        fontSize: 8 // Adjust font size if necessary
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Energy Usage by Device Type'
+                }
+            }
+        });
+        var ctxZip = document.getElementById('energyByZipChart').getContext('2d');
+        var energyZipData = {{ energy_zip_data | tojson | safe }};
+
+        new Chart(ctxZip, {
+            type: 'bar',
+            data: {
+                labels: energyZipData.map(data => data.ZIPCode),
+                datasets: [{
+                    label: 'Total Energy Used',
+                    data: energyZipData.map(data => data.TotalEnergyUsed),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                tooltips: {
+                    mode: 'index',
+                    intersect: false,
+                    position: 'nearest', // Tooltip will appear close to the cursor
+                    yPadding: 10, // Padding within the tooltip
+                    xPadding: 10,
+                    caretSize: 10, // Size of the tooltip arrow
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Background color of the tooltip
+                    bodyFontColor: 'rgba(0, 0, 0, 0.7)', // Font color of the tooltip text
+                    borderColor: 'rgba(0, 0, 0, 0.1)', // Border color of the tooltip
+                    borderWidth: 1,
+                    bodySpacing: 4, // Spacing between lines of the tooltip text
+                    displayColors: false, // Whether to display color boxes next to the tooltip text
+                    cornerRadius: 6, // Tooltip corner radius
+                    // Disable tooltip animation to prevent resizing
+                    enabled: false,
+                    custom: function(tooltipModel) {
+                        // Tooltip will only display when not hovering over the chart
+                        if (tooltipModel.opacity === 0) {
+                            tooltipModel.opacity = 1;
+                        }
+                    }
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+                legend: {
+                    display: false
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                title: {
+                    display: true,
+                    text: 'Energy Consumption by ZIP Code'
+                }
+            }
+        });
+        var ctxServiceLocation = document.getElementById('energyByServiceLocationChart').getContext('2d');
+        var energyServiceLocationData = {{ energy_service_location_data | tojson | safe }};
+
+        new Chart(ctxServiceLocation, {
+            type: 'bar',
+            data: {
+                labels: energyServiceLocationData.map(data => `SL ${data.ServiceLocationID}`), // X-axis labels (ServiceLocationIDs)
+                datasets: [{
+                    label: 'Total Energy Used',
+                    data: energyServiceLocationData.map(data => data.TotalEnergy), // Y-axis data
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                },
+                legend: {
+                    display: false // Hides the legend as we only have one dataset
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                title: {
+                    display: true,
+                    text: 'Energy Consumption by Service Location'
+                }
+            }
+        });
+        var ctxWeekly = document.getElementById('weeklyEnergyChart').getContext('2d');
+    var weeklyData = {{ weekly_data_json | safe }};
+
+    // Create an array of all weeks present in the data for all service locations
+    var allWeeks = [];
+    Object.values(weeklyData).forEach(locationData => {
+      locationData.forEach(data => {
+        if (!allWeeks.includes(data.week)) {
+          allWeeks.push(data.week);
+        }
+      });
+    });
+
+    // Sort weeks. Assumes the format "YYYY-Www"
+    allWeeks.sort((a, b) => {
+      return new Date(a.split('-W')[0], a.split('-W')[1] - 1) - 
+             new Date(b.split('-W')[0], b.split('-W')[1] - 1);
+    });
+
+    // Generate datasets for each service location
+    var datasets = Object.keys(weeklyData).map(serviceLocationID => {
+      var color = getRandomColor();
+      return {
+        label: 'Service Location ' + serviceLocationID,
+        data: allWeeks.map(week => {
+          var weekData = weeklyData[serviceLocationID].find(data => data.week === week);
+          return weekData ? weekData.energy : null;
+        }),
+        fill: false,
+        borderColor: color,
+        backgroundColor: color,
+        pointRadius: 3,
+        lineTension: 0.1,
+        spanGaps: true 
+      };
+    });
+
+    // Create the line chart
+    new Chart(ctxWeekly, {
+      type: 'line',
+      data: {
+        labels: allWeeks,
+        datasets: datasets
+      },
+      options: {
+        scales: {
+          xAxes: [{
+            type: 'time',
+            time: {
+              parser: 'YYYY-Www',
+              unit: 'week',
+              displayFormats: {
+                week: 'YYYY-Www'
+              }
+            },
+            distribution: 'series',
+            ticks: {
+              autoSkip: false,
+              maxRotation: 90,
+              minRotation: 90
+            }
+          }],
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        },
+        responsive: true,
+        maintainAspectRatio: false,
+        title: {
+          display: true,
+          text: 'Weekly Energy Consumption by Service Location'
+        },
+        tooltips: {
+          mode: 'index',
+          intersect: false
+        },
+        hover: {
+          mode: 'nearest',
+          intersect: true
+        },
+        legend: {
+          display: true,
+          position: 'top'
+        }
+      }
+    });
+
+    // Function to get random color for the chart lines
+    function getRandomColor() {
+      var letters = '0123456789ABCDEF';
+      var color = '#';
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    });
     </script>
 </body>
 </html>
