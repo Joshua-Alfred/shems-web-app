@@ -116,7 +116,6 @@ def fetch_weekly_energy_data(user_id):
             'week': f"{row.Year}-W{row.WeekOfYear}",
             'energy': row.TotalEnergyUsed
         })
-    print(weekly_data)
     return weekly_data
 
 def fetch_energy_usage_per_service_location(customer_id):
